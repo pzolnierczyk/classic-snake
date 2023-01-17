@@ -1,0 +1,87 @@
+import pygame, time, random
+
+pygame.init()
+screen_size = width, height = 400, 300
+screen = pygame.display.set_mode(screen_size)
+pygame.display.set_caption('Snake!')
+
+block = 10
+
+
+clock = pygame.time.Clock()
+
+font_style = pygame.font.SysFont(None, 50)
+
+def message(msg,color):
+    mesg = font_style.render(msg, True, color)
+    screen.blit(mesg, [4*width/14, 4*height/15])
+
+# class snake:
+#     def __init__(self) -> None:
+#         pass
+#     def snake_
+
+class food:
+    # Creating food for the snake. Each coordinate is rounded to 10 px, they are recreated until there is no collision with the snake
+    def __init__(self, player_xy) -> None:
+        self.player_xy = player_xy
+    def food_x(self):
+        return round(random.randrange(0, width-block)/10)*10
+    def food_y(self):
+        return round(random.randrange(0, height-block)/10)*10
+
+    def food_creation(self):
+        food_xy = [self.food_x(), self.food_y()]
+        while food_xy[0] == self.player_xy[0] and food_xy[1] == self.player_xy[1]:
+            food_xy = [self.food_x(), self.food_y()]
+        return food_xy
+
+
+def main():
+    game_loop = True
+
+    # player_xy =
+    player_xy = [width/2, height/2]
+    f = food(player_xy)
+    food_xy = f.food_creation()
+    
+
+    while game_loop:
+
+        # Keyboard Control 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: game_loop = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    player_xy[0]+= -block
+                if event.key == pygame.K_RIGHT:
+                    player_xy[0]+= +block
+                if event.key == pygame.K_UP:
+                    player_xy[1]+= -block
+                if event.key == pygame.K_DOWN:
+                    player_xy[1]+= +block
+
+        # Collision with wall 
+        if player_xy[0] < 0 or player_xy[0] > width or player_xy[1] < 0 or player_xy[1] > height:
+            game_loop = False
+
+        # Eating food
+        if round(player_xy[0]) == round(food_xy[0]) and player_xy[1] == food_xy[1]:
+            food_xy = f.food_creation()
+
+        clock.tick(30)
+
+        # Image refresh
+        screen.fill((255,255,255))
+        pygame.draw.rect(screen,(0,255,0),[food_xy[0], food_xy[1], block, block])  
+        pygame.draw.rect(screen,(0,0,0),[player_xy[0], player_xy[1], block, block])
+        pygame.display.update()
+
+    message('Game over', (255, 0, 255))
+    pygame.display.update()
+    time.sleep(5)
+
+    pygame.quit()
+    quit()  
+
+main()
