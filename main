@@ -32,7 +32,7 @@ class food:
 
     def food_creation(self):
         food_xy = [self.food_x(), self.food_y()]
-        while food_xy[0] == self.player_xy[0] and food_xy[1] == self.player_xy[1]:
+        while food_xy == self.player_xy:
             food_xy = [self.food_x(), self.food_y()]
         return food_xy
 
@@ -40,11 +40,16 @@ class food:
 def main():
     game_loop = True
 
-    # player_xy =
     player_xy = [width/2, height/2]
+    head = player_xy.copy()
+    snake_coords = []
+    snake_coords.append(head)
+    snake_length = 1
+    movement =[0,0]
+
     f = food(player_xy)
     food_xy = f.food_creation()
-    
+
 
     while game_loop:
 
@@ -53,33 +58,51 @@ def main():
             if event.type == pygame.QUIT: game_loop = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    player_xy[0]+= -block
+                    movement = [-block, 0]
                 if event.key == pygame.K_RIGHT:
-                    player_xy[0]+= +block
+                    movement = [block, 0]
                 if event.key == pygame.K_UP:
-                    player_xy[1]+= -block
+                    movement = [0, -block]
                 if event.key == pygame.K_DOWN:
-                    player_xy[1]+= +block
+                    movement = [0, block]
+
+        player_xy[0] = player_xy[0]+movement[0]
+        player_xy[1] = player_xy[1]+movement[1]
 
         # Collision with wall 
         if player_xy[0] < 0 or player_xy[0] > width or player_xy[1] < 0 or player_xy[1] > height:
             game_loop = False
 
-        # Eating food
-        if round(player_xy[0]) == round(food_xy[0]) and player_xy[1] == food_xy[1]:
-            food_xy = f.food_creation()
+        # Collision with itself
+        for coordinate in snake_coords[:-1]:
+            if coordinate == player_xy: game_loop = False
 
-        clock.tick(30)
+        # Eating food
+        if player_xy == food_xy:
+            food_xy = f.food_creation()
+            snake_length+=1
+        
+        # Snake location
+        if player_xy != snake_coords[-1]: #ensuring part of snake won't disappear if the loop is too fast
+            head = player_xy.copy()
+            snake_coords.append(head)
+        if len(snake_coords) > snake_length:
+            del snake_coords[0]
+        print(snake_coords)
+        
 
         # Image refresh
         screen.fill((255,255,255))
-        pygame.draw.rect(screen,(0,255,0),[food_xy[0], food_xy[1], block, block])  
-        pygame.draw.rect(screen,(0,0,0),[player_xy[0], player_xy[1], block, block])
+        pygame.draw.rect(screen,(0,255,0),[food_xy[0], food_xy[1], block, block])
+        for coordinate in snake_coords:
+            pygame.draw.rect(screen,(0,0,0),[coordinate[0], coordinate[1], block, block])
         pygame.display.update()
 
+        clock.tick(10)
+        
     message('Game over', (255, 0, 255))
     pygame.display.update()
-    time.sleep(5)
+    time.sleep(1)
 
     pygame.quit()
     quit()  
