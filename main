@@ -5,35 +5,29 @@ screen_size = width, height = 800, 600
 screen = pygame.display.set_mode(screen_size)
 pygame.display.set_caption('Snake!')
 
-block = 10
-snake_color = (37, 66, 82)
-food_color = (240,67,82)
-background_color = (245,212,169)
-critical_msg_color = (234, 28, 62)
-ordinary_msg_color = (50, 50, 60)
-score_color = (0,0,0)
+# block = 10
+# snake_color = (37, 66, 82)
+# food_color = (240,67,82)
+# background_color = (245,212,169)
+# critical_msg_color = (234, 28, 62)
+# ordinary_msg_color = (50, 50, 60)
+# score_color = (0,0,0)
 
-clock = pygame.time.Clock()
+# clock = pygame.time.Clock()
 
-def message(msg, font_size, color, y_loc = 3*600/7):
-    font = pygame.font.SysFont(None, font_size)
-    text = font.render(msg, True, color)
-    text_rect = text.get_rect(center=(width/2, y_loc))
-    screen.blit(text, text_rect)
-
-# class snake:
-#     def __init__(self) -> None:
-#         pass
-#     def snake_
 
 class food:
     # Creating food for the snake. Each coordinate is rounded to 10 px, they are recreated until there is no collision with the snake
-    def __init__(self, player_xy) -> None:
+    def __init__(self, player_xy, width, height, block) -> None:
         self.player_xy = player_xy
+        self.width = width
+        self.height = height
+        self.block = block
+
     def food_x(self):
-        return round(random.randrange(0, width-block)/10)*10
+        return round(random.randrange(0, self.width-self.block)/10)*10
     def food_y(self):
-        return round(random.randrange(0, height-block)/10)*10
+        return round(random.randrange(0, self.height-self.block)/10)*10
 
     def food_creation(self):
         food_xy = [self.food_x(), self.food_y()]
@@ -41,161 +35,182 @@ class food:
             food_xy = [self.food_x(), self.food_y()]
         return food_xy
 
-def snake_move(snake_length, movement, new_movement):
-    # Exception for reversed movement: if player is longer than 1 and goes right, he cannot go left etc
-    if snake_length == 1: movement = new_movement
-    elif new_movement != [-x for x in movement]:
-            movement = new_movement
-    return movement
 
-def player_score(length):
-    score = (length-1)*10
-    scoring_msg = pygame.font.SysFont(None, 25).render("Score: " +str(score), True, score_color)
-    screen.blit(scoring_msg, [10,10])
+class game:
+    def __init__(self) -> None:
+        self.snake_color = (37, 66, 82)
+        self.food_color = (240,67,82)
+        self.background_color = (245,212,169)
+        self.critical_msg_color = (234, 28, 62)
+        self.ordinary_msg_color = (50, 50, 60)
+        self.score_color = (0,0,0)
+        self.screen_size = self.width, self.height = 800, 600
+        self.block = 10
 
+    def message(self, msg, font_size, color, y_loc = 3*600/7):
+        font = pygame.font.SysFont('Corbel', font_size)
+        text = font.render(msg, True, color)
+        text_rect = text.get_rect(center=(self.width/2, y_loc))
+        self.screen.blit(text, text_rect)
 
-def start_menu(game_loop):
-    pause = True
-    # pygame.event.clear()
-    while pause:
-        event = pygame.event.wait()
-        
-        if event.type == pygame.QUIT:
-            game_loop = False
-            pause = False
-        
-        message('SNAKE', 50, critical_msg_color, height/4)
-        message('Press any key to start the game', 30, ordinary_msg_color, height/3)
-        pygame.display.update()
-        
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
+    def start_menu(self, game_loop):
+        pause = True
+        # pygame.event.clear()
+        while pause:
+            event = pygame.event.wait()
+            
+            if event.type == pygame.QUIT:
                 game_loop = False
                 pause = False
-            if event.key != pygame.K_ESCAPE:
-                pause = False
-
-    return game_loop
-
-def quit_game():
-    game_loop = False
-    game_over = False
-    return game_loop, game_over
-
-def game_pause(game_loop):
-    pause = True
-    pygame.event.clear()
-    while pause:
-        event = pygame.event.wait()
-        
-        if event.type == pygame.QUIT:
-            game_loop = False
-            pause = False
-        
-        message('Game Paused. Press P to continue', 30, critical_msg_color)
-        pygame.display.update()
-        
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                game_loop = False
-                pause = False
-                return game_loop
-            if event.key == pygame.K_p:
-                pause = False
-    return game_loop
-    
-
-def main():
-    game_loop = True
-    game_over = False
-
-    player_xy = [width/2, height/2]
-    head = player_xy.copy()
-    snake_coords = []
-    snake_coords.append(head)
-    snake_length = 1
-    movement =[0,0]
-
-    f = food(player_xy)
-    food_xy = f.food_creation()
-
-    screen.fill(background_color)
-    game_loop = start_menu(game_loop)
-
-    while game_loop:
-        
-        while game_over:
-            if event.type == pygame.QUIT: 
-                game_loop, game_over = quit_game()
-            message('Game over', 50, critical_msg_color, height/4)
-            message('Press SPACE to play again or ESC to exit', 30, critical_msg_color, height/3)
+            
+            self.message('SNAKE', 50, self.critical_msg_color, self.height/4)
+            self.message('Press any key to start the game', 30, self.ordinary_msg_color, self.height/3)
             pygame.display.update()
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:    
-                    if event.key == pygame.K_ESCAPE: 
-                        game_loop, game_over = quit_game()
-                    if event.key == pygame.K_SPACE: main()
-
-        # Keyboard Control 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: game_loop = False
+            
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    new_movement = [-block, 0]
-                    movement = snake_move(snake_length, movement, new_movement)
-                if event.key == pygame.K_RIGHT:
-                    new_movement = [block, 0]
-                    movement = snake_move(snake_length, movement, new_movement)
-                if event.key == pygame.K_UP:
-                    new_movement = [0, -block]
-                    movement = snake_move(snake_length, movement, new_movement)
-                if event.key == pygame.K_DOWN:
-                    new_movement = [0, block]
-                    movement = snake_move(snake_length, movement, new_movement)   
-                if event.key == pygame.K_p: 
-                    game_loop = game_pause(game_loop)
-                if event.key == pygame.K_ESCAPE: 
-                    game_loop, game_over = quit_game()
-                        
+                if event.key == pygame.K_ESCAPE:
+                    game_loop = False
+                    pause = False
+                if event.key != pygame.K_ESCAPE:
+                    pause = False
+        return game_loop
 
-        player_xy[0] = player_xy[0]+movement[0]
-        player_xy[1] = player_xy[1]+movement[1]
+    def quit_game(self):
+        game_loop = False
+        game_over = False
+        return game_loop, game_over
 
-        # Collision with wall 
-        if player_xy[0] < 0 or player_xy[0] > width or player_xy[1] < 0 or player_xy[1] > height:
-            game_over = True
-
-        # Collision with itself
-        for coordinate in snake_coords[:-1]:
-            if coordinate == player_xy: game_over = True
-
-        # Eating food
-        if player_xy == food_xy:
-            food_xy = f.food_creation()
-            snake_length+=1
+    def game_pause(self, game_loop):
+        pause = True
+        pygame.event.clear()
         
-        
-
-        # Snake coordinates
-        if player_xy != snake_coords[-1]: #ensuring part of snake won't disappear if the loop is too fast
-            head = player_xy.copy()
-            snake_coords.append(head)
-        if len(snake_coords) > snake_length:
-            del snake_coords[0]
-        print(snake_coords)
-        
-        # Image refresh
-        screen.fill(background_color)
-        pygame.draw.rect(screen,food_color,[food_xy[0], food_xy[1], block, block])
-        for coordinate in snake_coords:
-            pygame.draw.rect(screen,snake_color,[coordinate[0], coordinate[1], block, block])
-        
-        player_score(snake_length) #scoring
-        pygame.display.update()
-
-        clock.tick(30)
+        while pause:
+            event = pygame.event.wait()
+            
+            if event.type == pygame.QUIT:
+                game_loop = False
+                pause = False
+            
+            self.message('Game Paused. Press P to continue', 30, self.critical_msg_color)
+            pygame.display.update()
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    game_loop = False
+                    pause = False
+                    return game_loop
+                if event.key == pygame.K_p:
+                    pause = False
+        return game_loop
     
-    pygame.quit()
-    quit()  
+    def snake_move(self, nake_length, movement, new_movement):
+        # Exception for reversed movement: if player is longer than 1 and goes right, he cannot go left etc
+        if self.snake_length == 1: movement = new_movement
+        elif new_movement != [-x for x in movement]:
+                movement = new_movement
+        return movement
 
-main()
+    def player_score(self, length):
+        score = (length-1)*10
+        scoring_msg = pygame.font.SysFont(None, 25).render("Score: " +str(score), True, self.score_color)
+        self.screen.blit(scoring_msg, [10,10])
+
+    def main(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode(self.screen_size)
+        pygame.display.set_caption('Snake!')
+        clock = pygame.time.Clock()
+
+        game_loop = True
+        game_over = False
+
+        player_xy = [self.width/2, self.height/2]
+        head = player_xy.copy()
+        snake_coords = []
+        snake_coords.append(head)
+        self.snake_length = 1
+        movement = [0,0]
+
+        f = food(player_xy, self.width, self.height, self.block)
+        food_xy = f.food_creation()
+
+        self.screen.fill(self.background_color)
+        game_loop = self.start_menu(game_loop)
+
+        while game_loop:
+            
+            while game_over:
+                if event.type == pygame.QUIT: 
+                    game_loop, game_over = self.quit_game()
+                self.message('Game over', 50, self.critical_msg_color, self.height/4)
+                self.message('Press SPACE to play again or ESC to exit', 30, self.critical_msg_color, self.height/3)
+                pygame.display.update()
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:    
+                        if event.key == pygame.K_ESCAPE: 
+                            game_loop, game_over = self.quit_game()
+                        if event.key == pygame.K_SPACE: self.main()
+
+            # Keyboard Control 
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT: game_loop = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        new_movement = [-self.block, 0]
+                        movement = self.snake_move(self.snake_length, movement, new_movement)
+                    if event.key == pygame.K_RIGHT:
+                        new_movement = [self.block, 0]
+                        movement = self.snake_move(self.snake_length, movement, new_movement)
+                    if event.key == pygame.K_UP:
+                        new_movement = [0, -self.block]
+                        movement = self.snake_move(self.snake_length, movement, new_movement)
+                    if event.key == pygame.K_DOWN:
+                        new_movement = [0, self.block]
+                        movement = self.snake_move(self.snake_length, movement, new_movement)   
+                    if event.key == pygame.K_p: 
+                        game_loop = self.game_pause(game_loop)
+                    if event.key == pygame.K_ESCAPE: 
+                        game_loop, game_over = self.quit_game()
+                            
+
+            player_xy[0] = player_xy[0]+movement[0]
+            player_xy[1] = player_xy[1]+movement[1]
+
+            # Collision with wall 
+            if player_xy[0] < 0 or player_xy[0] > self.width or player_xy[1] < 0 or player_xy[1] > self.height:
+                game_over = True
+
+            # Collision with itself
+            for coordinate in snake_coords[:-1]:
+                if coordinate == player_xy: game_over = True
+
+            # Eating food
+            if player_xy == food_xy:
+                food_xy = f.food_creation()
+                self.snake_length+=1
+
+            # Snake coordinates
+            if player_xy != snake_coords[-1]: #ensuring part of snake won't disappear if the loop is too fast
+                head = player_xy.copy()
+                snake_coords.append(head)
+            if len(snake_coords) > self.snake_length:
+                del snake_coords[0]
+            print(snake_coords)
+            
+            # Image refresh
+            self.screen.fill(self.background_color)
+            pygame.draw.rect(self.screen,self.food_color,[food_xy[0], food_xy[1], self.block, self.block])
+            for coordinate in snake_coords:
+                pygame.draw.rect(self.screen, self.snake_color,[coordinate[0], coordinate[1], self.block, self.block])
+            
+            self.player_score(self.snake_length) #scoring
+            pygame.display.update()
+
+            clock.tick(30)
+        
+        pygame.quit()
+        quit()  
+
+
+snake = game()
+snake.main()
