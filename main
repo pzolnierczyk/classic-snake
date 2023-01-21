@@ -1,23 +1,16 @@
-import pygame, time, random
-
-pygame.init()
-screen_size = width, height = 800, 600
-screen = pygame.display.set_mode(screen_size)
-pygame.display.set_caption('Snake!')
-
-# block = 10
-# snake_color = (37, 66, 82)
-# food_color = (240,67,82)
-# background_color = (245,212,169)
-# critical_msg_color = (234, 28, 62)
-# ordinary_msg_color = (50, 50, 60)
-# score_color = (0,0,0)
-
-# clock = pygame.time.Clock()
-
+import pygame, random
 
 class food:
-    # Creating food for the snake. Each coordinate is rounded to 10 px, they are recreated until there is no collision with the snake
+    '''
+    Creating food for the snake. 
+    Each coordinate is rounded to 10 px, they are recreated until there is no collision with the snake
+
+    player_xy: player location along the X and Y axes
+    width: screen width (X)
+    height: screen height (Y)
+    block: size of each displayed block 
+    '''
+
     def __init__(self, player_xy, width, height, block) -> None:
         self.player_xy = player_xy
         self.width = width
@@ -31,12 +24,16 @@ class food:
 
     def food_creation(self):
         food_xy = [self.food_x(), self.food_y()]
-        while food_xy == self.player_xy:
+        while food_xy == self.player_xy: 
             food_xy = [self.food_x(), self.food_y()]
         return food_xy
 
 
 class game:
+    '''
+    Main class of the game
+    '''
+    
     def __init__(self) -> None:
         self.snake_color = (37, 66, 82)
         self.food_color = (240,67,82)
@@ -48,12 +45,25 @@ class game:
         self.block = 10
 
     def message(self, msg, font_size, color, y_loc = 3*600/7):
+        '''
+        Function for displaying messages
+        msg: text of the message
+        font_size: text size
+        color: text color
+        y_loc: text location along the Y axis (height)
+        '''
+
         font = pygame.font.SysFont('Corbel', font_size)
         text = font.render(msg, True, color)
         text_rect = text.get_rect(center=(self.width/2, y_loc))
         self.screen.blit(text, text_rect)
 
     def start_menu(self, game_loop):
+        '''
+        Start menu of the game
+        game_loop: flag for game continuation. False: game aborted, True: game continues
+        '''
+    
         pause = True
         # pygame.event.clear()
         while pause:
@@ -81,6 +91,10 @@ class game:
         return game_loop, game_over
 
     def game_pause(self, game_loop):
+        '''
+        Pause state
+        '''
+
         pause = True
         pygame.event.clear()
         
@@ -103,19 +117,33 @@ class game:
                     pause = False
         return game_loop
     
-    def snake_move(self, nake_length, movement, new_movement):
-        # Exception for reversed movement: if player is longer than 1 and goes right, he cannot go left etc
-        if self.snake_length == 1: movement = new_movement
+    def snake_move(self, snake_length, movement, new_movement):
+        '''
+        Snake movement
+
+        Exception for reversed movement: if snake is longer than 1 it cannot turn around in spot 
+        For example, if snake goes right, he cannot immediately go left etc
+        movement: the movement performed the last time
+        new_movement: new movement the player tries to do 
+        '''
+
+        if snake_length == 1: movement = new_movement
         elif new_movement != [-x for x in movement]:
                 movement = new_movement
         return movement
 
     def player_score(self, length):
+        ''' Displaying the score
+        lenght: snake length'''
         score = (length-1)*10
         scoring_msg = pygame.font.SysFont(None, 25).render("Score: " +str(score), True, self.score_color)
         self.screen.blit(scoring_msg, [10,10])
 
     def main(self):
+        '''
+        Main function of the game
+        '''
+
         pygame.init()
         self.screen = pygame.display.set_mode(self.screen_size)
         pygame.display.set_caption('Snake!')
@@ -128,7 +156,7 @@ class game:
         head = player_xy.copy()
         snake_coords = []
         snake_coords.append(head)
-        self.snake_length = 1
+        snake_length = 1
         movement = [0,0]
 
         f = food(player_xy, self.width, self.height, self.block)
@@ -157,16 +185,16 @@ class game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
                         new_movement = [-self.block, 0]
-                        movement = self.snake_move(self.snake_length, movement, new_movement)
+                        movement = self.snake_move(snake_length, movement, new_movement)
                     if event.key == pygame.K_RIGHT:
                         new_movement = [self.block, 0]
-                        movement = self.snake_move(self.snake_length, movement, new_movement)
+                        movement = self.snake_move(snake_length, movement, new_movement)
                     if event.key == pygame.K_UP:
                         new_movement = [0, -self.block]
-                        movement = self.snake_move(self.snake_length, movement, new_movement)
+                        movement = self.snake_move(snake_length, movement, new_movement)
                     if event.key == pygame.K_DOWN:
                         new_movement = [0, self.block]
-                        movement = self.snake_move(self.snake_length, movement, new_movement)   
+                        movement = self.snake_move(snake_length, movement, new_movement)   
                     if event.key == pygame.K_p: 
                         game_loop = self.game_pause(game_loop)
                     if event.key == pygame.K_ESCAPE: 
@@ -187,13 +215,13 @@ class game:
             # Eating food
             if player_xy == food_xy:
                 food_xy = f.food_creation()
-                self.snake_length+=1
+                snake_length+=1
 
             # Snake coordinates
             if player_xy != snake_coords[-1]: #ensuring part of snake won't disappear if the loop is too fast
                 head = player_xy.copy()
                 snake_coords.append(head)
-            if len(snake_coords) > self.snake_length:
+            if len(snake_coords) > snake_length:
                 del snake_coords[0]
             print(snake_coords)
             
@@ -203,7 +231,7 @@ class game:
             for coordinate in snake_coords:
                 pygame.draw.rect(self.screen, self.snake_color,[coordinate[0], coordinate[1], self.block, self.block])
             
-            self.player_score(self.snake_length) #scoring
+            self.player_score(snake_length) #scoring
             pygame.display.update()
 
             clock.tick(30)
