@@ -1,5 +1,5 @@
 # Snake
-Classic snake game created using PyGame.
+Classic snake game created using PyGame, featuring simple start menu and a pause option.
 
 ### Controls:
 Arrow keys to move the snake
